@@ -1,0 +1,9 @@
+{
+  "name": "co-editing",
+  "version": "0.0.1",
+  "description": "Collaborative editing demo use Slate.js and Nestjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "gouflv"
+}
