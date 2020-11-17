@@ -1,7 +1,6 @@
 import React from 'react'
 import './App.css'
 import { Client } from './components/Client'
-import { SlateEditor } from './components/SlateEditor'
 
 function App() {
   return (

@@ -1,5 +1,5 @@
 import React, { FC } from 'react'
-import { SlateEditor } from './SlateEditor'
+import { Editor } from './Editor'
 
 interface ClientProps {
   name: string
@@ -10,7 +10,7 @@ export const Client: FC<ClientProps> = (props) => {
     <div className='client-container'>
       <h2 className='mb-2 font-medium'>Editor: {props.name}</h2>
       <div className='editor p-4 bg-gray-100'>
-        <SlateEditor />
+        <Editor name={props.name} />
       </div>
     </div>
   )
