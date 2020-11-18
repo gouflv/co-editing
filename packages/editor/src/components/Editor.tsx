@@ -11,11 +11,12 @@ export const Editor: FC<EditorProps> = (props) => {
   const editor = useMemo(() => {
     const e = withReact(createEditor())
     return withSocketIO(e, {
-      url: `http://co-editing.local.com/api`,
+      url: 'http://localhost:3000',
       connectOpts: {
         query: {
           name: props.name
         }
+        reconnectionDelay: 5000
       }
     })
   }, [])

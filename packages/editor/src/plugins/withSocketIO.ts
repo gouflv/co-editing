@@ -1,11 +1,9 @@
 import { Editor } from 'slate'
-import { io, Socket } from 'socket.io-client'
-import { ManagerOptions } from 'socket.io-client/build/manager'
-import { SocketOptions } from 'socket.io-client/build/socket'
+import io from 'socket.io-client'
 
 export interface SocketIOPluginOptions {
   url: string
-  connectOpts?: Partial<ManagerOptions | SocketOptions>
+  connectOpts?: SocketIOClient.ConnectOpts
 
   onConnect?: () => void
   onDisconnect?: () => void
@@ -13,7 +11,7 @@ export interface SocketIOPluginOptions {
 }
 
 export interface WithSocketIOEditor {
-  socket: Socket
+  socket: SocketIOClient.Socket
 
   connect: () => void
   disconnect: () => void
