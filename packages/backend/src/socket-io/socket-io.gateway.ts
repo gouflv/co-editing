@@ -17,20 +17,21 @@ export class SocketIoGateway
   @WebSocketServer()
   server: Server
 
-  afterInit(server: Server): any {
+  afterInit(server: Server) {
     this.logger.log('Init')
   }
 
-  handleConnection(client: Socket, ...args: any[]): any {
+  handleConnection(client: Socket, ...args: any[]) {
     this.logger.log('Client connected', client.id)
   }
 
-  handleDisconnect(client: Socket): any {
+  handleDisconnect(client: Socket) {
     this.logger.log('Client disconnected', client.id)
   }
 
   @SubscribeMessage('message')
-  handleMessage(client: any, payload: any): string {
-    return 'Hello world!'
+  handleMessage(client: Socket, payload: any) {
+    this.logger.log('Client message', JSON.stringify(payload))
+    client.emit('message', payload)
   }
 }

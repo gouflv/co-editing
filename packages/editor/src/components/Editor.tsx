@@ -1,24 +1,39 @@
 import React, { FC, useCallback, useMemo, useState } from 'react'
 import { createEditor, Node } from 'slate'
 import { Editable, RenderElementProps, Slate, withReact } from 'slate-react'
-import { withSocketIO } from '../plugins/withSocketIO'
+import withCollaboration, {
+  CollaborationPluginOptions
+} from '../plugins/withCollaboration'
+import { SocketIOPluginOptions, withSocketIO } from '../plugins/withSocketIO'
 
 interface EditorProps {
   name: string
 }
 
 export const Editor: FC<EditorProps> = (props) => {
+  const { name } = props
+
   const editor = useMemo(() => {
     const e = withReact(createEditor())
-    return withSocketIO(e, {
-      url: 'http://localhost:3000',
+
+    const options: CollaborationPluginOptions & SocketIOPluginOptions = {
+      docId: '/co-doc',
+      url:
+        process.env.NODE_ENV === 'production'
+          ? window.location.origin
+          : 'http://localhost:3000',
+      cursor: {
+        name,
+        color: '#2c64de'
+      },
       connectOpts: {
         query: {
-          name: props.name
-        }
+          name
+        },
         reconnectionDelay: 5000
       }
-    })
+    }
+    return withSocketIO(withCollaboration(e, options), options)
   }, [])
 
   const [value, setValue] = useState<Node[]>([

@@ -21,7 +21,7 @@ export interface WithSocketIOEditor {
   destroy: (op) => void
 }
 
-const log = require('debug')('withSocketIO')
+const log = require('debug')('plugin.withSocketIO')
 
 export const withSocketIO = <T extends Editor>(
   editor: T,
