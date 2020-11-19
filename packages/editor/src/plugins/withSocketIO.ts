@@ -20,7 +20,7 @@ export interface WithSocketIOEditor {
 
   send: (op) => void
   receive: (op: CollabAction) => void
-  destroy: (op: CollabAction) => void
+  destroy: () => void
 }
 
 const log = require('debug')('plugin.withSocketIO')
@@ -46,7 +46,8 @@ export const withSocketIO = <T extends Editor>(
       onError && onError(message)
     })
 
-    e.socket.on('message', (data) => {
+    e.socket.on('msg', (data) => {
+      log('msg', data)
       e.receive(data)
     })
 
@@ -82,8 +83,6 @@ export const withSocketIO = <T extends Editor>(
   e.destroy = () => {
     e.socket.close()
   }
-
-  e.connect()
 
   return e
 }

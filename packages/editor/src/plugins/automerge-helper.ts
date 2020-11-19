@@ -1,17 +1,17 @@
 import Automerge from 'automerge'
 import { Editor, Operation } from 'slate'
+import { toJS } from '../utils'
 import { applyOperation } from '../utils/apply'
 import { setCursor } from '../utils/cursor'
 import { AMDoc, CursorData } from './index'
 import { WithCollaborationEditor } from './withCollaboration'
-import { toJS } from '../utils'
 
 const log = require('debug')('utils.AutomergeHelper')
 
 export const AutomergeHelper = {
   createConnection(e: WithCollaborationEditor, emit: (data) => void) {
     return new Automerge.Connection(e.docSet, (msg) => {
-      debugger
+      log('Automerge.Connection send', msg)
       emit(msg)
     })
   },
@@ -24,10 +24,11 @@ export const AutomergeHelper = {
     const currDoc = e.docSet.getDoc(docId)
     const newDoc = Automerge.load<AMDoc>(data)
     const merged = Automerge.merge<AMDoc>(newDoc, currDoc || Automerge.init())
+
     e.docSet.setDoc(docId, merged)
 
     Editor.withoutNormalizing(e, () => {
-      // e.children =
+      e.children = toJS(merged).children
       e.onChange()
     })
   },
@@ -41,8 +42,8 @@ export const AutomergeHelper = {
     let doc = e.docSet.getDoc(docId)
     if (!doc) {
       console.warn(`docId: ${docId} no found`)
-      e.docSet.setDoc(docId, Automerge.init())
-      doc = e.docSet.getDoc(docId)
+      throw `Unknown docId ${docId}`
+      return
     }
 
     let changed
@@ -52,16 +53,16 @@ export const AutomergeHelper = {
       )
     }
 
-    log(`changed`, toJS(changed))
-
-    changed = Automerge.change(changed || changed, (d) => {
+    changed = Automerge.change(changed || doc, (d) => {
       setCursor(e.clientId, e.selection, d, ops, cursorData || ({} as any))
     })
-
-    log(`changed`, toJS(changed))
 
     e.docSet.setDoc(docId, changed)
   },
 
-  applyOperation: () => {}
+  applyOperation: (
+    e: WithCollaborationEditor,
+    docId: string,
+    data: Automerge.Message
+  ) => {}
 }

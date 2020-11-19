@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useMemo, useState } from 'react'
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { createEditor, Node } from 'slate'
 import { Editable, RenderElementProps, Slate, withReact } from 'slate-react'
 import withCollaboration, {
@@ -10,6 +10,8 @@ interface EditorProps {
   name: string
 }
 
+const DOC_ID = '/co-doc'
+
 export const Editor: FC<EditorProps> = (props) => {
   const { name } = props
 
@@ -17,18 +19,20 @@ export const Editor: FC<EditorProps> = (props) => {
     const e = withReact(createEditor())
 
     const options: CollaborationPluginOptions & SocketIOPluginOptions = {
-      docId: '/co-doc',
+      docId: DOC_ID,
       url:
-        process.env.NODE_ENV === 'production'
+        (process.env.NODE_ENV === 'production'
           ? window.location.origin
-          : 'http://localhost:3000',
+          : 'http://localhost:3000') + DOC_ID,
       cursorData: {
         name,
         color: '#2c64de'
       },
       connectOpts: {
         query: {
-          name
+          name,
+          token: name,
+          slug: DOC_ID
         },
         reconnectionDelay: 5000
       }
@@ -36,20 +40,12 @@ export const Editor: FC<EditorProps> = (props) => {
     return withSocketIO(withCollaboration(e, options), options)
   }, [])
 
-  const [value, setValue] = useState<Node[]>([
-    {
-      type: 'heading-1',
-      children: [{ text: 'Header' }]
-    },
-    {
-      type: 'paragraph',
-      children: [{ text: 'A line of text in a paragraph.' }]
-    },
-    {
-      type: 'code',
-      children: [{ text: 'A line of text in a paragraph.' }]
-    }
-  ])
+  useEffect(() => {
+    editor.connect()
+    return editor.destroy
+  }, [])
+
+  const [value, setValue] = useState<Node[]>([])
 
   const renderElement = useCallback(
     ({ attributes, children, element }: RenderElementProps) => {

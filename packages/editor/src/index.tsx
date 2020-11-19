@@ -4,7 +4,7 @@ import './index.css'
 import App from './App'
 // import reportWebVitals from './reportWebVitals'
 
-localStorage.debug = 'utils.*, plugin.*, socket.io-client.*'
+localStorage.debug = 'utils.*, plugin.*'
 
 ReactDOM.render(
   <React.StrictMode>

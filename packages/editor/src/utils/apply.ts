@@ -11,7 +11,7 @@ export const applyOperation = (doc: AMValue, op: Operation): AMValue => {
     if (!func) {
       throw `no apply fun for ${op.type}`
     }
-    return func(doc)
+    return func(doc, op)
   } catch (e) {
     console.error(e)
     return doc

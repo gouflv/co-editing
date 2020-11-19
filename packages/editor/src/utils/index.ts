@@ -1,1 +1,7 @@
-export const toJS = (val) => JSON.parse(JSON.stringify(val))
+export const toJS = (val) => {
+  try {
+    return JSON.parse(JSON.stringify(val))
+  } catch (e) {
+    return null
+  }
+}

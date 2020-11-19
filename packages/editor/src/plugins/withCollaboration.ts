@@ -12,6 +12,7 @@ export interface CollaborationPluginOptions {
 export interface WithCollaborationEditor extends Editor {
   clientId: string
 
+  isRemote: boolean
   docSet: Automerge.DocSet<AMDoc>
   amConnection: Automerge.Connection<AMDoc>
 
@@ -37,9 +38,7 @@ const withCollaboration = <T extends Editor>(
 
   const createAMConnection = () => {
     if (e.amConnection) e.amConnection.close()
-    e.amConnection = AutomergeHelper.createConnection(e, (data) => {
-      e.send(data)
-    })
+    e.amConnection = AutomergeHelper.createConnection(e, (data) => e.send(data))
     e.amConnection.open()
   }
   createAMConnection()
@@ -55,13 +54,21 @@ const withCollaboration = <T extends Editor>(
   e.onChange = () => {
     const ops = e.operations
     log('onChange', 'ops', JSON.stringify(ops))
-    AutomergeHelper.applySlateOps(e, docId, ops, cursorData)
-    onChange()
+
+    if (!e.isRemote) {
+      AutomergeHelper.applySlateOps(e, docId, ops, cursorData)
+      onChange()
+    }
   }
 
   e.receiveDocument = (data) => {
     AutomergeHelper.receiveDocument(e, docId, data)
     createAMConnection()
+  }
+
+  e.receiveOperation = (data) => {
+    if (docId !== data.docId) return
+    AutomergeHelper.applyOperation(e, docId, data)
   }
 
   return e
