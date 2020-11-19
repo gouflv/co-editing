@@ -1,5 +1,7 @@
 import { Editor } from 'slate'
 import io from 'socket.io-client'
+import { CollabAction } from './index'
+import { WithCollaborationEditor } from './withCollaboration'
 
 export interface SocketIOPluginOptions {
   url: string
@@ -17,8 +19,8 @@ export interface WithSocketIOEditor {
   disconnect: () => void
 
   send: (op) => void
-  receive: (op) => void
-  destroy: (op) => void
+  receive: (op: CollabAction) => void
+  destroy: (op: CollabAction) => void
 }
 
 const log = require('debug')('plugin.withSocketIO')
@@ -27,7 +29,7 @@ export const withSocketIO = <T extends Editor>(
   editor: T,
   options: SocketIOPluginOptions
 ) => {
-  const e = editor as T & WithSocketIOEditor
+  const e = editor as T & WithSocketIOEditor & WithCollaborationEditor
   const { url, connectOpts, onConnect, onDisconnect, onError } = options
 
   e.connect = () => {
@@ -35,6 +37,7 @@ export const withSocketIO = <T extends Editor>(
       e.socket = io(url, connectOpts)
       e.socket.on('connect', () => {
         log(`socket connect: id:${e.socket.id}`)
+        e.clientId = e.socket.id
         onConnect && onConnect()
       })
     }
@@ -59,10 +62,17 @@ export const withSocketIO = <T extends Editor>(
 
   e.disconnect = () => {
     log(`disconnect`)
+    e.socket.close()
   }
 
   e.receive = (op) => {
     log(`receive`, op)
+    switch (op.type) {
+      case 'document':
+        return e.receiveDocument(op.payload)
+      case 'operation':
+        return e.receiveOperation(op.payload)
+    }
   }
 
   e.send = (op) => {
